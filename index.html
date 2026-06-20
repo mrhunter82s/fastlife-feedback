@@ -280,10 +280,6 @@
     </div>
     <h2>ممنون که وقت گذاشتی</h2>
     <p>همین تجربهٔ واقعیِ تو، چیزیه که ابزارها رو بهتر می‌کنه.</p>
-    <div class="doneacts">
-      <button class="dbtn" id="copyBtn" type="button">کپی جواب‌ها</button>
-      <button class="dbtn" id="downloadBtn" type="button">ذخیرهٔ فایل</button>
-    </div>
   </div>
 </div>
 
@@ -428,21 +424,20 @@
     return lines.join("\n");
   }
 
-  var lastText="";
+  var lastText="", submitting=false;
   function showToast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2200);}
 
   $("#formView").addEventListener("submit",function(e){
     e.preventDefault();
+    if(submitting) return;            // جلوگیری از ثبتِ دوباره با کلیکِ دوم
+    submitting=true;
+    var sbtn=$(".submit"); if(sbtn){sbtn.disabled=true;sbtn.textContent="در حال ارسال…";}
     var out=collect();
     lastText=asText(out);
-
     if(FORM_ENDPOINT){
-      fetch(FORM_ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(out)})
-        .then(function(){finish();})
-        .catch(function(){finish();});
-    } else {
-      finish();
+      try{ fetch(FORM_ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(out)}); }catch(err){}
     }
+    finish();
   });
 
   function finish(){
@@ -451,16 +446,6 @@
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
-  $("#copyBtn").addEventListener("click",function(){
-    if(navigator.clipboard){navigator.clipboard.writeText(lastText).then(function(){showToast("جواب‌ها کپی شد");},function(){showToast("کپی نشد");});}
-  });
-  $("#downloadBtn").addEventListener("click",function(){
-    var blob=new Blob([lastText],{type:"text/plain;charset=utf-8"});
-    var a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="فیدبک-فست-لایف.txt";
-    document.body.appendChild(a);a.click();a.remove();
-  });
 })();
 </script>
 </body>
